@@ -59,7 +59,7 @@ Asegúrate de tener instalado:
     ```
     *Deberás ver el mensaje: "Servidor Luxury corriendo en puerto 4000".*
 
-### 5. Configuración del Frontend (Cliente)
+### 3. Configuración del Frontend (Cliente)
 1.  Abre una **nueva pestaña en la Terminal** (Cmd + T) y navega a la carpeta del cliente:
     ```bash
     cd frontend

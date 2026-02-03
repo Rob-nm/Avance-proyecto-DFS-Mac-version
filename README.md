@@ -29,10 +29,9 @@ Sigue estos pasos para levantar el proyecto en tu entorno local (MacBook / iMac)
 
 ### 1. Prerrequisitos
 Asegúrate de tener instalado:
-* [Node.js](https://nodejs.org/) (Versión LTS recomendada para macOS).
-* [MySQL Server](https://dev.mysql.com/downloads/mysql/) (DMG Archive) y MySQL Workbench.
+* [Node.js](https://nodejs.org/) (Versión LTS recomendada).
+* [MySQL Server y Workbench] (https://dev.mysql.com/downloads/) 
 * Git.
-* https://dev.mysql.com/downloads/
     
 
 ### 2. Configuración del Backend (Servidor)

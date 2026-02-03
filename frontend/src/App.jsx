@@ -227,8 +227,8 @@ const ProductCard = ({ prod, addToCart }) => {
           src={prod.imagen_url} 
           alt={prod.nombre}
           onError={(e) => {
-             e.target.style.display = 'none';
-             e.target.parentNode.innerHTML = '<span style="color:#666; font-size:0.8rem">IMG NO DISPONIBLE</span>';
+            e.target.style.display = 'none';
+            e.target.parentNode.innerHTML = '<span style="color:#666; font-size:0.8rem">IMG NO DISPONIBLE</span>';
           }} 
         />
       </div>
@@ -392,8 +392,8 @@ function App() {
     const item = newCart[index];
     
     if (change === 1 && item.quantity >= item.maxStock) {
-       alert(`Solo quedan ${item.maxStock} unidades disponibles.`);
-       return;
+      alert(`Solo quedan ${item.maxStock} unidades disponibles.`);
+      return;
     }
 
     const newQuantity = item.quantity + change;

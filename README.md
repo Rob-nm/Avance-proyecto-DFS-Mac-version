@@ -38,6 +38,8 @@ Asegúrate de tener instalado:
 2.  Crea una nueva base de datos llamada `tomford_db`.
 3.  Ejecuta el script SQL proporcionado en el archivo `database.sql` para crear las tablas `productos` y `usuarios`.
 
+    
+
 ### 3. Configuración del Backend (Servidor)
 ⚠️ **Paso Crítico para Mac:** macOS utiliza el puerto 5000 para "AirPlay Receiver". Debemos usar el **4000**.
 
@@ -109,5 +111,5 @@ Asegúrate de tener instalado:
 ---
 
 **Desarrollado por:** [HTMLovers]
-ReadMe mac.txt
-5 KB
+
+

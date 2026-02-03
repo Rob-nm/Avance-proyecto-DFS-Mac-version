@@ -32,15 +32,9 @@ Asegúrate de tener instalado:
 * [Node.js](https://nodejs.org/) (Versión LTS recomendada para macOS).
 * [MySQL Server](https://dev.mysql.com/downloads/mysql/) (DMG Archive) y MySQL Workbench.
 * Git.
-
-### 2. Configuración de la Base de Datos
-1.  Abre **MySQL Workbench**.
-2.  Crea una nueva base de datos llamada `tomford_db`.
-3.  Ejecuta el script SQL proporcionado en el archivo `database.sql` para crear las tablas `productos` y `usuarios`.
-
     
 
-### 3. Configuración del Backend (Servidor)
+### 2. Configuración del Backend (Servidor)
 ⚠️ **Paso Crítico para Mac:** macOS utiliza el puerto 5000 para "AirPlay Receiver". Debemos usar el **4000**.
 
 1.  Crea un archivo llamado `.env` en la raíz de la carpeta `backend` con el siguiente contenido exacto:
@@ -65,7 +59,7 @@ Asegúrate de tener instalado:
     ```
     *Deberás ver el mensaje: "Servidor Luxury corriendo en puerto 4000".*
 
-### 4. Configuración del Frontend (Cliente)
+### 5. Configuración del Frontend (Cliente)
 1.  Abre una **nueva pestaña en la Terminal** (Cmd + T) y navega a la carpeta del cliente:
     ```bash
     cd frontend

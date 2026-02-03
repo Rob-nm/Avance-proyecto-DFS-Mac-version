@@ -32,6 +32,7 @@ Asegúrate de tener instalado:
 * [Node.js](https://nodejs.org/) (Versión LTS recomendada para macOS).
 * [MySQL Server](https://dev.mysql.com/downloads/mysql/) (DMG Archive) y MySQL Workbench.
 * Git.
+* https://dev.mysql.com/downloads/
     
 
 ### 2. Configuración del Backend (Servidor)

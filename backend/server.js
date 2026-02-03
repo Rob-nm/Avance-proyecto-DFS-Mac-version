@@ -12,7 +12,7 @@ app.use(cors());
 
 app.use(express.json());
 app.use((req, res, next) => {
-    console.log(`📡 Recibí una petición: ${req.method} ${req.url}`);
+    console.log(` Recibí una petición: ${req.method} ${req.url}`);
     next();
 });
 // --- RUTAS ---
@@ -29,8 +29,8 @@ app.get('/api/productos', async (req, res, next) => {
     }
 });
 
-// 2. NUEVA RUTA: Procesar compra y restar stock
-// (Esta ruta DEBE ir antes del middleware de errores)
+// NUEVA RUTA: Procesar compra y restar stock
+
 app.post('/api/compra', async (req, res, next) => {
     try {
         const carrito = req.body; 
@@ -48,7 +48,7 @@ app.post('/api/compra', async (req, res, next) => {
         res.json({ mensaje: "Compra procesada y stock actualizado correctamente" });
 
     } catch (error) {
-        // Si falla algo, pasamos el error al manejador central
+       
         next(error);
     }
 });

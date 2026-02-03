@@ -15,7 +15,7 @@ const Header = ({ setView, user, logout, cartCount, toggleCart }) => {
   return (
     <header className="header">
       
-      {/* 1. BOTÓN HAMBURGUESA (Solo visible en Móvil) */}
+      {/*  BOTÓN HAMBURGUESA */}
       <button 
         className="mobile-menu-btn" 
         onClick={() => setIsMenuOpen(true)}
@@ -29,10 +29,10 @@ const Header = ({ setView, user, logout, cartCount, toggleCart }) => {
         </svg>
       </button>
 
-      {/* 2. LOGO (Centrado en Móvil, Izquierda en Desktop) */}
+      {/*  LOGO (Centrado en Móvil, Izquierda en Desktop) */}
       <div className="logo" onClick={() => handleNavClick('home')}>TOMFORD</div>
 
-      {/* 3. NAVEGACIÓN DE ESCRITORIO (Oculta en Móvil) */}
+      {/*  NAVEGACIÓN DE ESCRITORIO  */}
       <nav className="desktop-nav">
         <button onClick={() => setView('home')}>Fragancias</button>
         <button onClick={() => setView('home')}>Más buscados</button>
@@ -62,10 +62,10 @@ const Header = ({ setView, user, logout, cartCount, toggleCart }) => {
         </button>
       </div>
 
-      {/* 5. MENÚ MÓVIL (Overlay de Lujo - Solo visible cuando isMenuOpen es true) */}
+      {/*  MENÚ MÓVIL  */}
       <div className={`mobile-menu-overlay ${isMenuOpen ? 'active' : ''}`}>
         
-        {/* Botón Cerrar (X) */}
+        {/* Botón Cerrar  */}
         <button className="close-menu-btn" onClick={() => setIsMenuOpen(false)}>
           <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="square">
             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -183,7 +183,7 @@ const CartDrawer = ({ isOpen, closeCart, cart, removeFromCart, handleCheckout, u
   );
 };
 
-// --- HERO ---
+
 const Hero = () => {
   const scrollSafe = () => {
     const section = document.getElementById('catalogo');
@@ -201,7 +201,7 @@ const Hero = () => {
   );
 };
 
-// --- PRODUCT CARD ---
+
 const ProductCard = ({ prod, addToCart }) => {
   const [size, setSize] = useState('50ml'); 
   
@@ -260,7 +260,7 @@ const ProductCard = ({ prod, addToCart }) => {
   );
 };
 
-// --- PRODUCT GRID ---
+
 const ProductGrid = ({ addToCart }) => {
   const [productos, setProductos] = useState([]);
   const [error, setError] = useState(null);
@@ -289,7 +289,7 @@ const ProductGrid = ({ addToCart }) => {
   );
 };
 
-// --- LOGIN ---
+
 const Login = ({ setUser, setView }) => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [formData, setFormData] = useState({ nombre: '', email: '', password: '' });
@@ -351,7 +351,7 @@ const Login = ({ setUser, setView }) => {
   );
 };
 
-// --- APP PRINCIPAL ---
+
 
 function App() {
   const [view, setView] = useState('home');
@@ -416,12 +416,12 @@ function App() {
     setCart(newCart);
   };
 
-  // --- LÓGICA DE PAGO CORREGIDA (Con llamada al Backend) ---
+
   const handleCheckout = async () => {
     if (cart.length === 0) return;
 
     try {
-      // 1. VALIDACIÓN PREVIA (Consultamos stock fresco)
+      
       const resCheck = await fetch('http://localhost:4000/api/productos');
       if (!resCheck.ok) throw new Error('Error al conectar con inventario');
       
@@ -439,7 +439,7 @@ function App() {
         }
       }
 
-      // 2. PROCESAR COMPRA (Si pasa la validación, mandamos restar el stock al servidor)
+      //  PROCESAR COMPRA 
       const resBuy = await fetch('http://localhost:4000/api/compra', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -450,8 +450,7 @@ function App() {
         alert("Pedido confirmado. Gracias por su elegancia.");
         setCart([]); 
         setIsCartOpen(false);
-        // Opcional: Recargar página para actualizar grids
-        // window.location.reload(); 
+       
       } else {
         throw new Error('Error al procesar la compra en el servidor');
       }

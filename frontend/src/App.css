@@ -818,3 +818,301 @@ footer { padding: 40px; text-align: center; font-size: 0.7rem; color: #666; lett
     color: #fff !important;
   }
 }
+
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85); 
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background: #111;
+  padding: 40px;
+  text-align: center;
+  border: 1px solid #333;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.modal-content h2 {
+  font-family: 'Playfair Display', serif;
+  letter-spacing: 3px;
+  margin: 20px 0;
+  color: #fff;
+}
+
+.modal-content p {
+  color: #888;
+  margin-bottom: 30px;
+  font-size: 0.9rem;
+}
+
+.modal-icon {
+  margin-bottom: 10px;
+}
+
+/* Animación de entrada suave */
+.success-animation {
+  animation: fadeInDown 0.5s ease-out;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+
+/* --- ESTILOS EL HISTORIAL --- */
+.orders-container .modal-content {
+  padding: 30px; 
+  max-width: 380px; 
+}
+
+.orders-container .modal-content h2 {
+  font-size: 1.1rem; 
+  margin-top: 0;
+  margin-bottom: 15px; 
+  letter-spacing: 2px;
+}
+
+.orders-container .modal-content p {
+  font-size: 0.75rem; 
+  margin-top: 0;
+  margin-bottom: 25px; 
+  line-height: 1.4; 
+ 
+}
+
+.orders-container .modal-content div[style*="display: flex"] {
+  gap: 10px; 
+}
+
+.orders-container .modal-content .btn-luxury {
+  padding: 10px 20px; 
+  font-size: 0.6rem; 
+}
+
+.order-card-luxury {
+  background: #050505;
+  border: 1px solid #1a1a1a;
+  padding: 40px;
+  margin-bottom: 40px;
+  transition: all 0.4s ease;
+}
+
+.order-card-header {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #1a1a1a;
+  padding-bottom: 20px;
+  margin-bottom: 30px;
+  letter-spacing: 2px;
+  color: #555;
+  font-size: 0.7rem;
+}
+
+.order-item-line {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+  color: #ccc;
+  border-bottom: 1px solid #0f0f0f;
+  padding-bottom: 10px;
+}
+
+.order-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 30px;
+}
+
+.total-label {
+  display: block;
+  font-size: 0.6rem;
+  letter-spacing: 3px;
+  color: #555;
+  margin-bottom: 5px;
+}
+
+.total-gold {
+  color: #d4af37;
+  font-size: 1.5rem;
+  font-family: var(--font-heading);
+  letter-spacing: 1px;
+}
+
+.order-btns button {
+  background: transparent;
+  border: 1px solid #333;
+  color: #fff;
+  padding: 12px 25px;
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-order-edit:hover {
+  background: #fff;
+  color: #000;
+  border-color: #fff;
+}
+
+/* Contenedor del nombre de usuario */
+.user-dropdown-container {
+  position: relative; 
+  display: inline-block;
+}
+
+.user-name-btn {
+  background: none;
+  border: 1px solid transparent;
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  cursor: pointer;
+  padding: 5px 10px;
+  transition: all 0.3s;
+}
+
+.user-name-btn:hover {
+  border-color: var(--color-gold);
+}
+
+/* La lista pequeña que se despliega */
+.user-dropdown-menu {
+  position: absolute;
+  top: 110%; 
+  right: 0;
+  background: #000; 
+  border: 1px solid #222;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.8);
+  padding: 5px 0;
+}
+
+.user-dropdown-menu button {
+  background: none;
+  border: none;
+  color: #fff;
+  padding: 12px 20px;
+  text-align: left;
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.3s;
+}
+
+.user-dropdown-menu button:hover {
+  background: #111;
+  color: var(--color-gold);
+}
+
+
+.shipping-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.address-edit-section {
+  margin-top: 20px;
+  border-top: 1px solid #1a1a1a;
+  padding-top: 15px;
+}
+
+.address-edit-section label {
+  font-size: 0.6rem;
+  color: var(--color-gold);
+  letter-spacing: 2px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.address-input-edit {
+  width: 100%;
+  background: transparent;
+  border: 1px solid #222;
+  color: #888;
+  padding: 10px;
+  font-size: 0.8rem;
+  transition: border-color 0.3s;
+}
+
+.address-input-edit:focus {
+  border-color: #fff;
+  color: #fff;
+  outline: none;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85); 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  backdrop-filter: blur(5px); 
+}
+
+
+
+.size-selector {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 15px; 
+  margin-bottom: 10px;
+}
+
+.size-selector button {
+  background: none;
+  border: none;
+  color: #888; 
+  font-family: var(--font-body, sans-serif);
+  font-size: 0.7rem;
+  font-weight: 300;
+  letter-spacing: 2px;
+  cursor: pointer;
+  padding: 5px 10px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+}
+
+
+.size-selector .divider {
+  color: #333; 
+  font-size: 0.7rem;
+  margin: 0 2px; 
+}
+
+.size-selector button.active {
+  color: #fff; 
+  font-weight: 600; 
+}
+
+.size-selector button:hover:not(.active) {
+  color: #fff; 
+}

@@ -35,41 +35,38 @@ router.post('/registro', async (req, res, next) => {
 });
 
 // Login
-router.post('/login', async (req, res, next) => {
+router.post('/login', async (req, res) => {
     try {
-        let { nombre, password } = req.body;
-        nombre = String(nombre).trim();
-        password = String(password).trim();
-
-        console.log('------------------------------------------------');
-        console.log(`[LOGIN] Intento de acceso: ${nombre}`);
-
-        const [users] = await db.query('SELECT * FROM usuarios WHERE nombre = ?', [nombre]);
+        const { nombre, password } = req.body;
         
-        if (users.length === 0) {
-            console.log('[LOGIN] Fallo: Usuario no existe en DB');
-            return res.status(401).json({ mensaje: 'Usuario no encontrado' });
+        const [rows] = await db.query('SELECT * FROM usuarios WHERE nombre = ?', [nombre]);
+
+        if (rows.length === 0) {
+            return res.status(400).json({ error: 'Usuario no encontrado' });
         }
 
-        const user = users[0];
-        console.log(`[LOGIN] Usuario encontrado ID: ${user.id}`);
-        console.log(`[LOGIN] Hash en DB: ${user.password}`);
-        console.log(`[LOGIN] Contraseña enviada: "${password}"`);
-
-        const validPass = await bcrypt.compare(password, user.password);
-        console.log(`[LOGIN] ¿Coinciden?: ${validPass}`); 
-
-        if (!validPass) {
-            return res.status(401).json({ mensaje: 'Contraseña incorrecta (Verifica terminal)' });
+        const passwordValida = await bcrypt.compare(password, rows[0].password);
+        if (!passwordValida) {
+            return res.status(400).json({ error: 'Contraseña incorrecta' });
         }
 
-        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        res.json({ token, usuario: user.nombre });
+        const token = jwt.sign(
+            { id: rows[0].id, nombre: rows[0].nombre, rol: rows[0].rol }, 
+            process.env.JWT_SECRET || 'supersecreto', 
+            { expiresIn: '2h' }
+        );
+
+        res.json({ 
+            mensaje: "Bienvenido", 
+            usuario: rows[0].nombre, 
+            rol: rows[0].rol,
+            token: token 
+        });
     } catch (error) {
-        console.error('[LOGIN ERROR]', error);
-        next(error);
+        res.status(500).json({ error: error.message });
     }
 });
+
 
 module.exports = router;
 

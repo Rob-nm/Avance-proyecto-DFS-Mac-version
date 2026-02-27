@@ -138,7 +138,11 @@ nav button { background: none; border: none; color: #fff; margin-left: 20px; tex
   text-align: center;
   padding: 20px;
   transition: transform 0.3s;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
+
 .card:hover { transform: translateY(-5px); }
 
 .img-container {
@@ -324,7 +328,7 @@ footer { padding: 40px; text-align: center; font-size: 0.7rem; color: #666; lett
 .btn-add {
   display: block; 
   width: 100%;
-  margin-top: 20px;
+  margin-top: auto;
   padding: 14px 0; 
   background-color: transparent;
   border: 1px solid rgba(255, 255, 255, 0.3); 
@@ -339,7 +343,6 @@ footer { padding: 40px; text-align: center; font-size: 0.7rem; color: #666; lett
   
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-
 }
 
 .card:hover .btn-add {

@@ -23,7 +23,7 @@ const Header = ({ setView, user, logout, cartCount, toggleCart }) => {
 
       <nav className="desktop-nav">
         <button onClick={() => setView('home')}>Fragancias</button>
-        <button onClick={() => setView('home')}>Más buscados</button>
+        <button onClick={() => setView('catalogo')} className="nav-btn">CATÁLOGO</button>
         <button onClick={() => setView('home')}>Regalos</button>
         <button onClick={() => setView('home')}>Servicios</button>
       </nav>
@@ -148,6 +148,21 @@ const CartDrawer = ({ isOpen, closeCart, cart, removeFromCart, handleCheckout, u
     </div>
   );
 };
+
+const CatalogoView = ({ productos, addToCart, tasaUSD }) => (
+  <div className="container" style={{ minHeight: '80vh', padding: '50px 20px', color: '#fff' }}>
+    <h2 style={{ textAlign: 'center', marginBottom: '40px', letterSpacing: '2px' }}>CATÁLOGO</h2>
+    <div className="grid">
+      {productos && productos.length > 0 ? (
+        productos.map(prod => (
+          <ProductCard key={prod._id} prod={prod} addToCart={addToCart} tasaUSD={tasaUSD} />
+        ))
+      ) : (
+        <p style={{ textAlign: 'center', width: '100%' }}>Cargando catálogo...</p>
+      )}
+    </div>
+  </div>
+);
 
 const OrdersView = ({ setView, setCart, setIsCartOpen }) => {
   const [pedidos, setPedidos] = useState([]);
@@ -329,7 +344,7 @@ const ProductCard = ({ prod, addToCart, tasaUSD }) => {
       
       {/* CONVERSIÓN A DÓLARES (API) */}
       {precioUSD && (
-        <p className="usd-tag" style={{ fontSize: '0.7rem', color: '#666', marginTop: '5px', letterSpacing: '1px' }}>
+        <p className="usd-tag" style={{ fontSize: '0.7rem', color: '#666', marginTop: '5px', marginBottom: '20px', letterSpacing: '1px' }}>
           APROX. ${precioUSD} USD
         </p>
       )}
@@ -341,30 +356,12 @@ const ProductCard = ({ prod, addToCart, tasaUSD }) => {
   );
 };
 
-const ProductGrid = ({ addToCart }) => {
-  const [productos, setProductos] = useState([]);
-  const [tasaUSD, setTasaUSD] = useState(null);
-
-  useEffect(() => {
-    
-    fetch('http://localhost:4000/api/productos')
-      .then(res => res.json())
-      .then(data => setProductos(data.resultados || []));
-
-   
-    fetch('http://localhost:4000/api/conversion/MXN')
-      .then(res => res.json())
-      .then(data => {
-        if (data.tasasDeCambio) setTasaUSD(data.tasasDeCambio.USD);
-      })
-      .catch(err => console.error("Error en API Moneda:", err));
-  }, []);
-
+const ProductGrid = ({ addToCart, productos, tasaUSD }) => {
   return (
     <section id="catalogo" className="products-section">
       <h2>Colección Privada</h2>
       <div className="grid">
-        {productos.map(prod => (
+        {productos.slice(0, 8).map(prod => (
           <ProductCard 
             key={prod._id} 
             prod={prod} 
@@ -439,6 +436,21 @@ function App() {
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [productos, setProductos] = useState([]);
+  const [tasaUSD, setTasaUSD] = useState(null);
+
+  useEffect(() => {
+    fetch('http://localhost:4000/api/productos')
+      .then(res => res.json())
+      .then(data => setProductos(data.resultados || []));
+
+    fetch('http://localhost:4000/api/conversion/MXN')
+      .then(res => res.json())
+      .then(data => {
+        if (data.tasasDeCambio) setTasaUSD(data.tasasDeCambio.USD);
+      })
+      .catch(err => console.error("Error en API Moneda:", err));
+  }, []);
 
   useEffect(() => {
     const query = new URLSearchParams(window.location.search);
@@ -452,7 +464,6 @@ function App() {
       window.history.replaceState({}, document.title, "/");
     }
   }, []);
-
 
   useEffect(() => {
     const query = new URLSearchParams(window.location.search);
@@ -490,6 +501,7 @@ function App() {
     <div className="app">
       <Header setView={setView} user={user} logout={() => {localStorage.clear(); setUser(null); setView('home');}} cartCount={cart.length} toggleCart={() => setIsCartOpen(true)} />
       <CartDrawer isOpen={isCartOpen} closeCart={() => setIsCartOpen(false)} cart={cart} removeFromCart={(i) => setCart(cart.filter((_, idx) => idx !== i))} handleCheckout={handleCheckout} updateCartQuantity={(i, c) => { const nc = [...cart]; nc[i].quantity += c; if (nc[i].quantity >= 1) setCart(nc); }} updateCartSize={(i, s) => { const nc = [...cart]; nc[i].selectedSize = s; nc[i].precio = s === '50ml' ? Number(nc[i].precio_50) : Number(nc[i].precio_100); nc[i].nombre = nc[i].nombre.replace(/\((50|100)ml\)/, `(${s})`); setCart(nc); }} />
+      
       {view === 'home' && (
         <>
           <section className="hero">
@@ -500,15 +512,30 @@ function App() {
             </div>
           </section>
           <div className="container" style={{ paddingTop: '80px' }}>
-            <ProductGrid addToCart={(p) => {setCart([...cart, p]); setIsCartOpen(true);}} />
+            <ProductGrid addToCart={(p) => {setCart([...cart, p]); setIsCartOpen(true);}} productos={productos} tasaUSD={tasaUSD} />
           </div>
         </>
       )}
+
+      {view === 'catalogo' && (
+        <CatalogoView 
+          productos={productos} 
+          addToCart={(p) => {setCart([...cart, p]); setIsCartOpen(true);}} 
+          tasaUSD={tasaUSD}
+        />
+      )}
+
       {view === 'login' && <Login setUser={setUser} setView={setView} />}
       {view === 'orders' && <OrdersView setView={setView} setCart={setCart} setIsCartOpen={setIsCartOpen} />}
+      
       {showSuccessModal && (
         <div className="modal-overlay" onClick={() => setShowSuccessModal(false)}>
-          <div className="modal-content"><div className="modal-icon"><svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#d4af37" strokeWidth="1.5"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+          <div className="modal-content">
+            <div className="modal-icon">
+              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#d4af37" strokeWidth="1.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
             <h2>PAGO CONFIRMADO</h2>
             <button className="btn-luxury" onClick={() => setShowSuccessModal(false)}>LISTO</button>
           </div>

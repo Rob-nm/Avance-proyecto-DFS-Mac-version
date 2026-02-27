@@ -5,11 +5,14 @@ const connectDB = require('./database');
 require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+<<<<<<< HEAD
 const passport = require('passport');
 const session = require('express-session');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const GitHubStrategy = require('passport-github2').Strategy;
 const FacebookStrategy = require('passport-facebook').Strategy;
+=======
+>>>>>>> f9c95c6557af367b1e684c079078fff709f767f2
 
 // Configuración de Stripe
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
@@ -50,6 +53,7 @@ const PedidoSchema = new mongoose.Schema({
 });
 const Pedido = mongoose.model('Pedido', PedidoSchema);
 
+<<<<<<< HEAD
 app.use(session({ secret: process.env.SESSION_SECRET || 'secreto', resave: false, saveUninitialized: true }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -227,6 +231,124 @@ app.post('/api/crear-pago', async (req, res) => {
     try {
         const { carrito } = req.body;
         
+=======
+// --- RUTAS DE BASE DE DATOS ---
+app.get('/api/productos', async (req, res) => {
+    try {
+        const productos = await Producto.find();
+        res.json({ resultados: productos });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/pedidos', async (req, res) => {
+    const { usuario_id, productos, total, direccion_envio } = req.body; 
+    try {
+        const nuevoPedido = new Pedido({ usuario_id, productos, total, direccion_envio });
+        await nuevoPedido.save();
+        res.json({ mensaje: 'Pedido creado', pedido: nuevoPedido });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/api/pedidos', async (req, res) => {
+    try {
+        const pedidos = await Pedido.find();
+        res.json(pedidos);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.delete('/api/pedidos/:id', async (req, res) => {
+    try {
+        await Pedido.findByIdAndDelete(req.params.id);
+        res.json({ mensaje: 'Pedido eliminado' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.put('/api/pedidos/:id', async (req, res) => {
+    try {
+        const { direccion_envio } = req.body;
+        await Pedido.findByIdAndUpdate(req.params.id, { direccion_envio });
+        res.json({ mensaje: 'Dirección actualizada' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
+// --- RUTAS DE AUTENTICACIÓN ---
+app.post('/api/auth/registro', async (req, res) => {
+    const { nombre, email, password } = req.body;
+    try {
+        let usuario = await Usuario.findOne({ email });
+        if (usuario) return res.status(400).json({ error: 'El usuario ya existe' });
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        usuario = new Usuario({ nombre, email, password: hashedPassword });
+        await usuario.save();
+
+        const token = jwt.sign({ id: usuario._id }, 'clave_secreta_tomford', { expiresIn: '30d' });
+        res.json({ token, usuario: usuario.nombre });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+    const { nombre, password } = req.body;
+    try {
+        let usuario = await Usuario.findOne({ nombre });
+        if (!usuario) return res.status(400).json({ error: 'Usuario no encontrado' });
+
+        const isMatch = await bcrypt.compare(password, usuario.password);
+        if (!isMatch) return res.status(400).json({ error: 'Contraseña incorrecta' });
+
+        const token = jwt.sign({ id: usuario._id }, 'clave_secreta_tomford', { expiresIn: '30d' });
+        res.json({ token, usuario: usuario.nombre });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// --- RUTAS DE APIs EXTERNAS ---
+
+// 1. API de Tipo de Cambio (MXN a USD)
+app.get('/api/conversion/:moneda', async (req, res) => {
+    try {
+        const response = await fetch(`https://api.exchangerate-api.com/v4/latest/${req.params.moneda}`);
+        const data = await response.json();
+        res.json({ tasasDeCambio: data.rates });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener tasas de cambio' });
+    }
+});
+
+// 2. API de Zippopotam.us (Códigos Postales de México)
+app.get('/api/envio/:cp', async (req, res) => {
+    try {
+        const response = await fetch(`http://api.zippopotam.us/mx/${req.params.cp}`);
+        if (!response.ok) throw new Error('CP no encontrado');
+        const data = await response.json();
+        res.json({ ciudad: data.places[0]['place name'], estado: data.places[0]['state'] });
+    } catch (error) {
+        res.status(404).json({ error: 'Código postal no válido' });
+    }
+});
+
+// 3. API de Stripe (Procesamiento de Pagos)
+app.post('/api/crear-pago', async (req, res) => {
+    try {
+        const { carrito } = req.body;
+        
+>>>>>>> f9c95c6557af367b1e684c079078fff709f767f2
         const lineItems = carrito.map((item) => ({
             price_data: {
                 currency: 'mxn',
@@ -253,4 +375,8 @@ app.post('/api/crear-pago', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 4000;
+<<<<<<< HEAD
 app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`));
+=======
+app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`));
+>>>>>>> f9c95c6557af367b1e684c079078fff709f767f2

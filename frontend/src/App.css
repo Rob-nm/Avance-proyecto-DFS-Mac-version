@@ -1116,3 +1116,11 @@ footer { padding: 40px; text-align: center; font-size: 0.7rem; color: #666; lett
 .size-selector button:hover:not(.active) {
   color: #fff; 
 }
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: #000;
+  width: 100%;
+}

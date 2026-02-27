@@ -399,13 +399,10 @@ const Login = ({ setUser, setView }) => {
     }
   };
 
-<<<<<<< HEAD
   const handleOAuth = (provider) => {
     window.location.href = `http://localhost:4000/api/auth/${provider}`;
   };
 
-=======
->>>>>>> f9c95c6557af367b1e684c079078fff709f767f2
   return (
     <div className="login-container">
       <div className="login-box">

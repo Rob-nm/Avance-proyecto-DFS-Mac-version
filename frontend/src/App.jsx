@@ -79,7 +79,7 @@ const CartDrawer = ({ isOpen, closeCart, cart, removeFromCart, handleCheckout, u
   };
 
   const procesarPedido = () => {
-    if (!calleColonia || !numero || !cp) return; 
+    if (!calleColonia || !numero || !cp) return;
     const direccionFinal = `${calleColonia}, #${numero}. CP: ${cp}. ${direccionApi || ''}`;
     handleCheckout(direccionFinal);
   };
@@ -96,7 +96,7 @@ const CartDrawer = ({ isOpen, closeCart, cart, removeFromCart, handleCheckout, u
         ) : (
           <div className="cart-items">
             {cart.map((item, index) => (
-              <div key={`${item.id}-${item.selectedSize}`} className="cart-item">
+              <div key={`${item._id}-${item.selectedSize}`} className="cart-item">
                 <img src={item.imagen_url} alt={item.nombre} onError={(e) => { e.target.style.display = 'none'; }} />
                 <div className="item-info">
                   <div className="info-top">
@@ -152,6 +152,9 @@ const CartDrawer = ({ isOpen, closeCart, cart, removeFromCart, handleCheckout, u
 const OrdersView = ({ setView, setCart, setIsCartOpen }) => {
   const [pedidos, setPedidos] = useState([]);
   const [orderToDelete, setOrderToDelete] = useState(null); 
+  const [direcciones, setDirecciones] = useState({});
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [expandedItems, setExpandedItems] = useState({});
 
   const fetchPedidos = async () => {
     const res = await fetch('http://localhost:4000/api/pedidos', {
@@ -172,42 +175,84 @@ const OrdersView = ({ setView, setCart, setIsCartOpen }) => {
     fetchPedidos();
   };
 
-  const actualizarDireccion = async (id, nuevaDir) => {
-    const pedido = pedidos.find(p => p.id === id);
+  const handleDirChange = (id, valor) => {
+    setDirecciones({ ...direcciones, [id]: valor });
+  };
+
+  const actualizarDireccion = async (id) => {
+    const pedido = pedidos.find(p => p._id === id);
+    const nuevaDir = direcciones[id] || pedido.direccion_envio;
     await fetch(`http://localhost:4000/api/pedidos/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-      body: JSON.stringify({ productos: pedido.productos, total: pedido.total, direccion_envio: nuevaDir })
+      body: JSON.stringify({ direccion_envio: nuevaDir })
     });
+    setShowUpdateModal(true);
     fetchPedidos();
   };
 
+  const toggleDropdown = (orderId, index) => {
+    const key = `${orderId}-${index}`;
+    setExpandedItems(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
   return (
-    <div className="container orders-container">
+    <div className="container orders-container" style={{ flexGrow: 1, minHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
       <h2>HISTORIAL DE ÓRDENES</h2>
       {pedidos.map(p => (
-        <div key={p.id} className="order-card-luxury">
-          <div className="order-card-header"><span>ORDEN #{p.id}</span><span>{new Date(p.fecha).toLocaleDateString()}</span></div>
+        <div key={p._id} className="order-card-luxury">
+          <div className="order-card-header"><span>ORDEN #{p._id}</span><span>{new Date(p.fecha).toLocaleDateString()}</span></div>
           <div className="order-card-body">
-            {p.productos.map((item, i) => (
-              <div key={i} className="order-item-line"><span>{item.nombre}</span><span>x{item.quantity}</span></div>
-            ))}
+            {p.productos.map((item, i) => {
+              const isExpanded = expandedItems[`${p._id}-${i}`];
+              return (
+                <div key={i} style={{ borderBottom: '1px solid #1a1a1a', paddingBottom: '10px', marginBottom: '10px' }}>
+                  <div 
+                    className="order-item-line" 
+                    onClick={() => toggleDropdown(p._id, i)}
+                    style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                  >
+                    <span>{item.nombre} <span style={{fontSize: '0.6rem', color: '#d4af37', marginLeft: '10px'}}>{isExpanded ? '▲' : '▼'}</span></span>
+                    <span>x{item.quantity}</span>
+                  </div>
+                  
+                  {isExpanded && (
+                    <div style={{ display: 'flex', gap: '15px', marginTop: '15px', padding: '10px', background: '#080808', border: '1px solid #1a1a1a' }}>
+                      <img src={item.imagen_url} alt={item.nombre} style={{ width: '60px', height: 'auto', objectFit: 'contain' }} />
+                      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                        <span style={{ fontSize: '0.7rem', color: '#888', letterSpacing: '2px', textTransform: 'uppercase' }}>{item.categoria || 'PRIVATE BLEND'}</span>
+                        <span style={{ color: '#d4af37', marginTop: '5px', fontSize: '0.9rem' }}>${Number(item.precio).toLocaleString('es-MX')} MXN <span style={{fontSize: '0.6rem', color: '#666'}}>(C/U)</span></span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
             <div className="address-edit-box" style={{ marginTop: '20px', borderTop: '1px solid #222', paddingTop: '15px' }}>
               <label style={{ fontSize: '0.6rem', color: '#d4af37', letterSpacing: '2px' }}>DIRECCIÓN DE ENVÍO</label>
-              <textarea defaultValue={p.direccion_envio} onBlur={(e) => actualizarDireccion(p.id, e.target.value)} style={{ width: '100%', background: 'transparent', color: '#888', border: '1px solid #1a1a1a', padding: '10px', marginTop: '10px' }} />
+              <textarea 
+                defaultValue={p.direccion_envio} 
+                onChange={(e) => handleDirChange(p._id, e.target.value)} 
+                style={{ width: '100%', background: 'transparent', color: '#888', border: '1px solid #1a1a1a', padding: '10px', marginTop: '10px', resize: 'none' }} 
+              />
+              <button 
+                onClick={() => actualizarDireccion(p._id)} 
+                style={{ marginTop: '10px', padding: '8px 15px', background: 'transparent', color: '#d4af37', border: '1px solid #d4af37', cursor: 'pointer', fontSize: '0.7rem', letterSpacing: '1px' }}
+              >
+                GUARDAR CAMBIOS
+              </button>
             </div>
           </div>
           <div className="order-card-footer">
             <span className="total-gold">${Number(p.total).toLocaleString()} MXN</span>
             <div className="order-btns">
               <button onClick={() => {setCart(p.productos); setIsCartOpen(true); setView('home');}} className="btn-order-edit">RE-ORDENAR</button>
-              <button onClick={() => setOrderToDelete(p.id)} className="btn-order-del">ELIMINAR</button>
+              <button onClick={() => setOrderToDelete(p._id)} className="btn-order-del">ELIMINAR</button>
             </div>
           </div>
         </div>
       ))}
 
-      {/* POP-UP PERSONALIZADO DE ELIMINACIÓN */}
       {orderToDelete && (
         <div className="modal-overlay" onClick={() => setOrderToDelete(null)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -220,16 +265,28 @@ const OrdersView = ({ setView, setCart, setIsCartOpen }) => {
           </div>
         </div>
       )}
+
+      {showUpdateModal && (
+        <div className="modal-overlay" onClick={() => setShowUpdateModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-icon">
+              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#d4af37" strokeWidth="1.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <h2 style={{fontSize: '1.2rem', marginBottom: '20px', marginTop: '10px'}}>Actualizado con éxito</h2>
+            <button className="btn-luxury" onClick={() => setShowUpdateModal(false)}>CERRAR</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 const ProductCard = ({ prod, addToCart, tasaUSD }) => {
   const [size, setSize] = useState('50ml');
-  
-  // Determinamos el precio según el tamaño seleccionado
+ 
   const currentPrice = size === '50ml' ? prod.precio_50 : prod.precio_100;
-  
   // Cálculo de conversión a dólares usando la tasa de la API
   const precioUSD = tasaUSD ? (currentPrice * tasaUSD).toFixed(2) : null;
 
@@ -286,7 +343,7 @@ const ProductCard = ({ prod, addToCart, tasaUSD }) => {
 
 const ProductGrid = ({ addToCart }) => {
   const [productos, setProductos] = useState([]);
-  const [tasaUSD, setTasaUSD] = useState(null); 
+  const [tasaUSD, setTasaUSD] = useState(null);
 
   useEffect(() => {
     
@@ -309,7 +366,7 @@ const ProductGrid = ({ addToCart }) => {
       <div className="grid">
         {productos.map(prod => (
           <ProductCard 
-            key={prod.id} 
+            key={prod._id} 
             prod={prod} 
             addToCart={addToCart} 
             tasaUSD={tasaUSD} 
@@ -323,6 +380,7 @@ const ProductGrid = ({ addToCart }) => {
 const Login = ({ setUser, setView }) => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [form, setForm] = useState({ nombre: '', email: '', password: '' });
+
   const handle = async (e) => {
     e.preventDefault();
     const endpoint = isRegistering ? '/registro' : '/login';
@@ -335,6 +393,7 @@ const Login = ({ setUser, setView }) => {
       else { localStorage.setItem('token', data.token); setUser(data.usuario); setView('home'); }
     }
   };
+
   return (
     <div className="login-container">
       <div className="login-box">
@@ -344,6 +403,7 @@ const Login = ({ setUser, setView }) => {
           <button className={isRegistering ? 'active' : ''} onClick={() => setIsRegistering(true)}>CREAR CUENTA</button>
         </div>
         <h2 className="auth-title">{isRegistering ? 'Bienvenido' : 'Ingreso Exclusivo'}</h2>
+        
         <form onSubmit={handle}>
           <input type="text" placeholder="USUARIO" required onChange={e => setForm({...form, nombre: e.target.value})} className="input-luxury" />
           {isRegistering && <input type="email" placeholder="EMAIL" required onChange={e => setForm({...form, email: e.target.value})} className="input-luxury" />}

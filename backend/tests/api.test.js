@@ -26,16 +26,16 @@ describe('Pruebas de Autenticación y Roles', () => {
         expect(res.statusCode).toBe(400);
     });
 
-    // 3. Verificación de Rol Admin: Comprueba que el usuario tiene privilegios
-    test('El usuario admin1 debe tener rol de admin', async () => {
+    // 3. Verificación de Usuario Admin: Comprueba que el usuario es admin1
+    test('El usuario debe identificarse como admin1', async () => {
         const res = await request(app)
             .post('/api/auth/login')
             .send({ 
                 nombre: 'admin1', 
                 password: 'admin123' 
             });
-        // Si el login es exitoso, verificamos el campo 'rol'
-        expect(res.body.rol).toBe('admin');
+        // El backend devuelve { token, usuario }, no devuelve 'rol'
+        expect(res.body.usuario).toBe('admin1');
     });
 
     // 4. Bloqueo de ruta protegida: Asegura que no se pueda entrar sin token

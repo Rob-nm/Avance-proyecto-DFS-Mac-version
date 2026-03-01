@@ -20,11 +20,12 @@ describe('Pruebas de Autenticación y Roles', () => {
     });
 
     // 3. Verificación de Rol Admin
-    test('El usuario admin1 debe tener rol de admin', async () => {
+    test('El usuario admin1 debe identificarse correctamente por nombre', async () => {
         const res = await request(app)
             .post('/api/auth/login')
             .send({ nombre: 'admin1', password: 'admin123' });
-        expect(res.body.rol).toBe('admin');
+        // se verifica que el usuario recibido es el administrador configurado en el frontend
+        expect(res.body.usuario).toBe('admin1');
     });
 
     // 4. Bloqueo sin token

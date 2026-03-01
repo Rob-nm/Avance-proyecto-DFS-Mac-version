@@ -26,6 +26,7 @@ const UsuarioSchema = new mongoose.Schema({
     nombre: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    rol: { type: String, default: 'usuario' }, // <-- NUEVO: Asigna rol básico por defecto
     fecha_registro: { type: Date, default: Date.now }
 });
 const Usuario = mongoose.model('Usuario', UsuarioSchema);
@@ -70,7 +71,11 @@ const procesarOAuth = async (accessToken, refreshToken, profile, done) => {
             });
             await usuario.save();
         }
-        const token = jwt.sign({ id: usuario._id }, 'clave_secreta_tomford', { expiresIn: '30d' });
+        const token = jwt.sign(
+            { id: usuario._id, rol: usuario.rol }, 
+            process.env.JWT_SECRET, 
+            { expiresIn: '30d' }
+        );
         return done(null, { token, nombre: usuario.nombre });
     } catch (error) {
         return done(error, null);
@@ -174,7 +179,7 @@ app.post('/api/auth/registro', async (req, res) => {
         usuario = new Usuario({ nombre, email, password: hashedPassword });
         await usuario.save();
 
-        const token = jwt.sign({ id: usuario._id }, 'clave_secreta_tomford', { expiresIn: '30d' });
+        const token = jwt.sign({ id: usuario._id, rol: usuario.rol }, 'clave_secreta_tomford', { expiresIn: '30d' });
         res.json({ token, usuario: usuario.nombre });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -190,8 +195,15 @@ app.post('/api/auth/login', async (req, res) => {
         const isMatch = await bcrypt.compare(password, usuario.password);
         if (!isMatch) return res.status(400).json({ error: 'Contraseña incorrecta' });
 
-        const token = jwt.sign({ id: usuario._id }, 'clave_secreta_tomford', { expiresIn: '30d' });
-        res.json({ token, usuario: usuario.nombre });
+        const token = jwt.sign({ id: usuario._id, rol: usuario.rol }, 'clave_secreta_tomford', { expiresIn: '30d' });
+        
+        
+        res.json({ 
+            token, 
+            usuario: usuario.nombre, 
+            rol: usuario.rol 
+        });
+        
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -254,3 +266,5 @@ app.post('/api/crear-pago', async (req, res) => {
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`));
+
+module.exports = app;

@@ -3,7 +3,7 @@ import './App.css';
 
 // --- COMPONENTES ---
 
-const Header = ({ setView, user, logout, cartCount, toggleCart }) => {
+const Header = ({ setView, user, logout, cartCount, toggleCart, tasaUSD }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
@@ -26,6 +26,14 @@ const Header = ({ setView, user, logout, cartCount, toggleCart }) => {
         <button onClick={() => setView('catalogo')} className="nav-btn">CATÁLOGO</button>
         <button onClick={() => setView('home')}>Regalos</button>
         <button onClick={() => setView('home')}>Servicios</button>
+        {user === 'admin1' && (
+          <button onClick={() => setView('admin')} className="nav-btn" style={{ color: '#d4af37' }}>ADMIN</button>
+        )}
+        {tasaUSD && (
+          <span style={{ marginLeft: '20px', color: '#888', fontSize: '0.7rem', letterSpacing: '1px', display: 'flex', alignItems: 'center' }}>
+            1 USD = ${(1 / tasaUSD).toFixed(2)} MXN
+          </span>
+        )}
       </nav>
 
       <div className="header-icons">
@@ -37,6 +45,9 @@ const Header = ({ setView, user, logout, cartCount, toggleCart }) => {
               </button>
               {isUserMenuOpen && (
                 <div className="user-dropdown-menu">
+                  {user === 'admin1' && (
+                    <button onClick={() => handleNavClick('admin')} style={{ color: '#d4af37' }}>PANEL ADMIN</button>
+                  )}
                   <button onClick={() => handleNavClick('orders')}>MIS PEDIDOS</button>
                   <button onClick={() => { logout(); setIsUserMenuOpen(false); }}>SALIR</button>
                 </div>
@@ -149,6 +160,185 @@ const CartDrawer = ({ isOpen, closeCart, cart, removeFromCart, handleCheckout, u
   );
 };
 
+const AdminView = () => {
+  const [productos, setProductos] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+  const [productToDelete, setProductToDelete] = useState(null);
+  const [form, setForm] = useState({ 
+    nombre: '', categoria: '', precio_50: '', precio_100: '', stock_50: '', stock_100: '', imagen_url: '' 
+  });
+
+  const fetchProductos = () => {
+    fetch('http://localhost:4000/api/productos')
+      .then(res => res.json())
+      .then(data => setProductos(data.resultados || []));
+  };
+
+  useEffect(() => { fetchProductos(); }, []);
+
+  const confirmarEliminacion = async () => {
+    if (!productToDelete) return;
+    await fetch(`http://localhost:4000/api/productos/${productToDelete}`, { method: 'DELETE' });
+    setProductToDelete(null);
+    fetchProductos();
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const method = editingId ? 'PUT' : 'POST';
+    const url = editingId ? `http://localhost:4000/api/productos/${editingId}` : 'http://localhost:4000/api/productos';
+    
+    const datosParaEnviar = {
+      nombre: form.nombre,
+      categoria: form.categoria,
+      imagen_url: form.imagen_url,
+      precio_50: Number(form.precio_50),
+      precio_100: Number(form.precio_100),
+      stock_50: Number(form.stock_50),
+      stock_100: Number(form.stock_100)
+    };
+
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(datosParaEnviar)
+    });
+    
+    if (res.ok) {
+      setForm({ nombre: '', categoria: '', precio_50: '', precio_100: '', stock_50: '', stock_100: '', imagen_url: '' });
+      setEditingId(null);
+      fetchProductos();
+    }
+  };
+
+  const handleEdit = (prod) => {
+    setForm(prod);
+    setEditingId(prod._id);
+  };
+
+  const estiloInput = {
+    width: '100%',
+    padding: '16px 20px',
+    background: '#0a0a0a',
+    color: '#fff',
+    border: '1px solid #222',
+    outline: 'none',
+    fontSize: '0.75rem',
+    letterSpacing: '1.5px',
+    transition: 'border-color 0.3s'
+  };
+
+  const labelStyle = { 
+    fontSize: '0.65rem', 
+    color: '#d4af37', 
+    marginBottom: '8px', 
+    letterSpacing: '1px',
+    display: 'block'
+  };
+
+  return (
+    <div className="container" style={{ minHeight: '80vh', padding: '50px 20px', color: '#fff' }}>
+      <h2 style={{ textAlign: 'center', marginBottom: '50px', letterSpacing: '3px', color: '#fff', fontWeight: '300' }}>PANEL DE ADMINISTRACIÓN</h2>
+      
+      <div style={{ background: '#050505', padding: '40px', border: '1px solid #1a1a1a', marginBottom: '50px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
+        <h3 style={{ marginBottom: '30px', color: '#d4af37', fontSize: '0.9rem', letterSpacing: '2px', textAlign: 'center', borderBottom: '1px solid #1a1a1a', paddingBottom: '15px' }}>
+          {editingId ? 'EDITAR PRODUCTO' : 'AGREGAR NUEVO PRODUCTO'}
+        </h3>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'flex-start' }}>
+          
+          <div style={{ flex: '1 1 calc(33% - 20px)', minWidth: '250px' }}>
+            <label style={labelStyle}>NOMBRE DEL PRODUCTO:</label>
+            <input type="text" value={form.nombre} onChange={e => setForm({...form, nombre: e.target.value})} required style={estiloInput} onFocus={(e) => e.target.style.borderColor = '#d4af37'} onBlur={(e) => e.target.style.borderColor = '#222'} />
+          </div>
+
+          <div style={{ flex: '1 1 calc(33% - 20px)', minWidth: '250px' }}>
+            <label style={labelStyle}>CATEGORÍA (EJ. PRIVATE BLEND):</label>
+            <input type="text" value={form.categoria} onChange={e => setForm({...form, categoria: e.target.value})} required style={estiloInput} onFocus={(e) => e.target.style.borderColor = '#d4af37'} onBlur={(e) => e.target.style.borderColor = '#222'} />
+          </div>
+
+          <div style={{ flex: '1 1 calc(33% - 20px)', minWidth: '250px' }}>
+            <label style={labelStyle}>RUTA DE LA IMAGEN (/img/...webp):</label>
+            <input type="text" value={form.imagen_url} onChange={e => setForm({...form, imagen_url: e.target.value})} required style={estiloInput} onFocus={(e) => e.target.style.borderColor = '#d4af37'} onBlur={(e) => e.target.style.borderColor = '#222'} />
+          </div>
+          
+          <div style={{ flex: '1 1 calc(25% - 20px)', minWidth: '200px' }}>
+            <label style={labelStyle}>PRECIO 50ML (MXN):</label>
+            <input type="number" value={form.precio_50} onChange={e => setForm({...form, precio_50: e.target.value})} required style={estiloInput} onFocus={(e) => e.target.style.borderColor = '#d4af37'} onBlur={(e) => e.target.style.borderColor = '#222'} />
+          </div>
+
+          <div style={{ flex: '1 1 calc(25% - 20px)', minWidth: '200px' }}>
+            <label style={labelStyle}>PRECIO 100ML (MXN):</label>
+            <input type="number" value={form.precio_100} onChange={e => setForm({...form, precio_100: e.target.value})} required style={estiloInput} onFocus={(e) => e.target.style.borderColor = '#d4af37'} onBlur={(e) => e.target.style.borderColor = '#222'} />
+          </div>
+
+          <div style={{ flex: '1 1 calc(25% - 20px)', minWidth: '200px' }}>
+            <label style={labelStyle}>STOCK 50ML:</label>
+            <input type="number" value={form.stock_50} onChange={e => setForm({...form, stock_50: e.target.value})} required style={estiloInput} onFocus={(e) => e.target.style.borderColor = '#d4af37'} onBlur={(e) => e.target.style.borderColor = '#222'} />
+          </div>
+
+          <div style={{ flex: '1 1 calc(25% - 20px)', minWidth: '200px' }}>
+            <label style={labelStyle}>STOCK 100ML:</label>
+            <input type="number" value={form.stock_100} onChange={e => setForm({...form, stock_100: e.target.value})} required style={estiloInput} onFocus={(e) => e.target.style.borderColor = '#d4af37'} onBlur={(e) => e.target.style.borderColor = '#222'} />
+          </div>
+          
+          <div style={{ width: '100%', display: 'flex', gap: '20px', marginTop: '10px' }}>
+            <button type="submit" className="btn-luxury" style={{ flex: 1, padding: '16px 0', fontSize: '0.8rem' }}>{editingId ? 'GUARDAR CAMBIOS' : 'CREAR PRODUCTO'}</button>
+            {editingId && (
+              <button type="button" onClick={() => { setEditingId(null); setForm({ nombre: '', categoria: '', precio_50: '', precio_100: '', stock_50: '', stock_100: '', imagen_url: '' }); }} className="btn-luxury" style={{ flex: 1, background: '#111', borderColor: '#222', color: '#888', padding: '16px 0', fontSize: '0.8rem' }}>
+                CANCELAR
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
+
+      <div style={{ overflowX: 'auto', background: '#050505', border: '1px solid #1a1a1a', padding: '30px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
+        <h3 style={{ marginBottom: '20px', color: '#fff', fontSize: '0.9rem', letterSpacing: '2px' }}>INVENTARIO ACTUAL</h3>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.8rem' }}>
+          <thead>
+            <tr style={{ borderBottom: '1px solid #d4af37', color: '#d4af37', letterSpacing: '1px' }}>
+              <th style={{ padding: '15px 10px', fontWeight: 'normal' }}>IMG</th>
+              <th style={{ padding: '15px 10px', fontWeight: 'normal' }}>NOMBRE</th>
+              <th style={{ padding: '15px 10px', fontWeight: 'normal' }}>CATEGORÍA</th>
+              <th style={{ padding: '15px 10px', fontWeight: 'normal' }}>PRECIO (50/100)</th>
+              <th style={{ padding: '15px 10px', fontWeight: 'normal' }}>STOCK (50/100)</th>
+              <th style={{ padding: '15px 10px', fontWeight: 'normal', textAlign: 'center' }}>ACCIONES</th>
+            </tr>
+          </thead>
+          <tbody>
+            {productos.map(p => (
+              <tr key={p._id} style={{ borderBottom: '1px solid #111', transition: 'background 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.background = '#0a0a0a'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                <td style={{ padding: '15px 10px' }}><img src={p.imagen_url} alt="img" style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '2px' }} /></td>
+                <td style={{ padding: '15px 10px', color: '#eee', letterSpacing: '1px' }}>{p.nombre}</td>
+                <td style={{ padding: '15px 10px', color: '#888' }}>{p.categoria}</td>
+                <td style={{ padding: '15px 10px', color: '#aaa' }}>${p.precio_50} / ${p.precio_100}</td>
+                <td style={{ padding: '15px 10px', color: '#aaa' }}>{p.stock_50} / {p.stock_100}</td>
+                <td style={{ padding: '15px 10px', textAlign: 'center' }}>
+                  <button onClick={() => handleEdit(p)} style={{ padding: '8px 15px', marginRight: '10px', background: 'transparent', color: '#d4af37', border: '1px solid #d4af37', cursor: 'pointer', fontSize: '0.7rem', transition: 'all 0.3s' }} onMouseEnter={(e) => {e.target.style.background = '#d4af37'; e.target.style.color = '#000'}} onMouseLeave={(e) => {e.target.style.background = 'transparent'; e.target.style.color = '#d4af37'}}>EDITAR</button>
+                  <button onClick={() => setProductToDelete(p._id)} style={{ padding: '8px 15px', background: 'transparent', color: '#cf4d4d', border: '1px solid #cf4d4d', cursor: 'pointer', fontSize: '0.7rem', transition: 'all 0.3s' }} onMouseEnter={(e) => {e.target.style.background = '#cf4d4d'; e.target.style.color = '#fff'}} onMouseLeave={(e) => {e.target.style.background = 'transparent'; e.target.style.color = '#cf4d4d'}}>ELIMINAR</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {productToDelete && (
+        <div className="modal-overlay" onClick={() => setProductToDelete(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <h2 style={{fontSize: '1.2rem', marginBottom: '20px', color: '#fff'}}>¿ELIMINAR PRODUCTO?</h2>
+            <p style={{fontSize: '0.8rem', color: '#888', marginBottom: '30px'}}>Esta acción no se puede deshacer y el producto será borrado del catálogo.</p>
+            <div style={{display: 'flex', gap: '15px', justifyContent: 'center'}}>
+              <button className="btn-luxury" onClick={confirmarEliminacion} style={{background: '#cf4d4d', color: '#fff', borderColor: '#cf4d4d'}}>ELIMINAR</button>
+              <button className="btn-luxury" onClick={() => setProductToDelete(null)} style={{background: '#333', borderColor: '#333'}}>CANCELAR</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const CatalogoView = ({ productos, addToCart, tasaUSD }) => (
   <div className="container" style={{ minHeight: '80vh', padding: '50px 20px', color: '#fff' }}>
     <h2 style={{ textAlign: 'center', marginBottom: '40px', letterSpacing: '2px' }}>CATÁLOGO</h2>
@@ -170,6 +360,7 @@ const OrdersView = ({ setView, setCart, setIsCartOpen }) => {
   const [direcciones, setDirecciones] = useState({});
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [expandedItems, setExpandedItems] = useState({});
+  const [expandedOrders, setExpandedOrders] = useState({});
 
   const fetchPedidos = async () => {
     const res = await fetch('http://localhost:4000/api/pedidos', {
@@ -211,62 +402,84 @@ const OrdersView = ({ setView, setCart, setIsCartOpen }) => {
     setExpandedItems(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
+  const toggleOrderDropdown = (orderId) => {
+    setExpandedOrders(prev => ({ ...prev, [orderId]: !prev[orderId] }));
+  };
+
   return (
     <div className="container orders-container" style={{ flexGrow: 1, minHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
       <h2>HISTORIAL DE ÓRDENES</h2>
-      {pedidos.map(p => (
-        <div key={p._id} className="order-card-luxury">
-          <div className="order-card-header"><span>ORDEN #{p._id}</span><span>{new Date(p.fecha).toLocaleDateString()}</span></div>
-          <div className="order-card-body">
-            {p.productos.map((item, i) => {
-              const isExpanded = expandedItems[`${p._id}-${i}`];
-              return (
-                <div key={i} style={{ borderBottom: '1px solid #1a1a1a', paddingBottom: '10px', marginBottom: '10px' }}>
-                  <div 
-                    className="order-item-line" 
-                    onClick={() => toggleDropdown(p._id, i)}
-                    style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                  >
-                    <span>{item.nombre} <span style={{fontSize: '0.6rem', color: '#d4af37', marginLeft: '10px'}}>{isExpanded ? '▲' : '▼'}</span></span>
-                    <span>x{item.quantity}</span>
-                  </div>
-                  
-                  {isExpanded && (
-                    <div style={{ display: 'flex', gap: '15px', marginTop: '15px', padding: '10px', background: '#080808', border: '1px solid #1a1a1a' }}>
-                      <img src={item.imagen_url} alt={item.nombre} style={{ width: '60px', height: 'auto', objectFit: 'contain' }} />
-                      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                        <span style={{ fontSize: '0.7rem', color: '#888', letterSpacing: '2px', textTransform: 'uppercase' }}>{item.categoria || 'PRIVATE BLEND'}</span>
-                        <span style={{ color: '#d4af37', marginTop: '5px', fontSize: '0.9rem' }}>${Number(item.precio).toLocaleString('es-MX')} MXN <span style={{fontSize: '0.6rem', color: '#666'}}>(C/U)</span></span>
+      {pedidos.map(p => {
+        const isOrderExpanded = expandedOrders[p._id];
+        return (
+          <div key={p._id} className="order-card-luxury">
+            <div 
+              className="order-card-header" 
+              onClick={() => toggleOrderDropdown(p._id)}
+              style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+            >
+              <span>ORDEN #{p._id}</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                {new Date(p.fecha).toLocaleDateString()}
+                <span style={{ fontSize: '0.8rem', color: '#d4af37' }}>{isOrderExpanded ? '▲' : '▼'}</span>
+              </span>
+            </div>
+            
+            {isOrderExpanded && (
+              <>
+                <div className="order-card-body">
+                  {p.productos.map((item, i) => {
+                    const isExpanded = expandedItems[`${p._id}-${i}`];
+                    return (
+                      <div key={i} style={{ borderBottom: '1px solid #1a1a1a', paddingBottom: '10px', marginBottom: '10px' }}>
+                        <div 
+                          className="order-item-line" 
+                          onClick={() => toggleDropdown(p._id, i)}
+                          style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                        >
+                          <span>{item.nombre} <span style={{fontSize: '0.6rem', color: '#d4af37', marginLeft: '10px'}}>{isExpanded ? '▲' : '▼'}</span></span>
+                          <span>x{item.quantity}</span>
+                        </div>
+                        
+                        {isExpanded && (
+                          <div style={{ display: 'flex', gap: '15px', marginTop: '15px', padding: '10px', background: '#080808', border: '1px solid #1a1a1a' }}>
+                            <img src={item.imagen_url} alt={item.nombre} style={{ width: '60px', height: 'auto', objectFit: 'contain' }} />
+                            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                              <span style={{ fontSize: '0.7rem', color: '#888', letterSpacing: '2px', textTransform: 'uppercase' }}>{item.categoria || 'PRIVATE BLEND'}</span>
+                              <span style={{ color: '#d4af37', marginTop: '5px', fontSize: '0.9rem' }}>${Number(item.precio).toLocaleString('es-MX')} MXN <span style={{fontSize: '0.6rem', color: '#666'}}>(C/U)</span></span>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  )}
+                    );
+                  })}
+                  <div className="address-edit-box" style={{ marginTop: '20px', borderTop: '1px solid #222', paddingTop: '15px' }}>
+                    <label style={{ fontSize: '0.6rem', color: '#d4af37', letterSpacing: '2px' }}>DIRECCIÓN DE ENVÍO</label>
+                    <textarea 
+                      defaultValue={p.direccion_envio} 
+                      onChange={(e) => handleDirChange(p._id, e.target.value)} 
+                      style={{ width: '100%', background: 'transparent', color: '#888', border: '1px solid #1a1a1a', padding: '10px', marginTop: '10px', resize: 'none' }} 
+                    />
+                    <button 
+                      onClick={() => actualizarDireccion(p._id)} 
+                      style={{ marginTop: '10px', padding: '8px 15px', background: 'transparent', color: '#d4af37', border: '1px solid #d4af37', cursor: 'pointer', fontSize: '0.7rem', letterSpacing: '1px' }}
+                    >
+                      GUARDAR CAMBIOS
+                    </button>
+                  </div>
                 </div>
-              );
-            })}
-            <div className="address-edit-box" style={{ marginTop: '20px', borderTop: '1px solid #222', paddingTop: '15px' }}>
-              <label style={{ fontSize: '0.6rem', color: '#d4af37', letterSpacing: '2px' }}>DIRECCIÓN DE ENVÍO</label>
-              <textarea 
-                defaultValue={p.direccion_envio} 
-                onChange={(e) => handleDirChange(p._id, e.target.value)} 
-                style={{ width: '100%', background: 'transparent', color: '#888', border: '1px solid #1a1a1a', padding: '10px', marginTop: '10px', resize: 'none' }} 
-              />
-              <button 
-                onClick={() => actualizarDireccion(p._id)} 
-                style={{ marginTop: '10px', padding: '8px 15px', background: 'transparent', color: '#d4af37', border: '1px solid #d4af37', cursor: 'pointer', fontSize: '0.7rem', letterSpacing: '1px' }}
-              >
-                GUARDAR CAMBIOS
-              </button>
-            </div>
+                <div className="order-card-footer">
+                  <span className="total-gold">${Number(p.total).toLocaleString()} MXN</span>
+                  <div className="order-btns">
+                    <button onClick={() => {setCart(p.productos); setIsCartOpen(true); setView('home');}} className="btn-order-edit">RE-ORDENAR</button>
+                    <button onClick={() => setOrderToDelete(p._id)} className="btn-order-del">ELIMINAR</button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
-          <div className="order-card-footer">
-            <span className="total-gold">${Number(p.total).toLocaleString()} MXN</span>
-            <div className="order-btns">
-              <button onClick={() => {setCart(p.productos); setIsCartOpen(true); setView('home');}} className="btn-order-edit">RE-ORDENAR</button>
-              <button onClick={() => setOrderToDelete(p._id)} className="btn-order-del">ELIMINAR</button>
-            </div>
-          </div>
-        </div>
-      ))}
+        );
+      })}
 
       {orderToDelete && (
         <div className="modal-overlay" onClick={() => setOrderToDelete(null)}>
@@ -391,7 +604,11 @@ const Login = ({ setUser, setView }) => {
         localStorage.setItem('token', data.token); 
         localStorage.setItem('usuario', data.usuario); 
         setUser(data.usuario); 
-        setView('home'); 
+        if(data.usuario === 'admin1') {
+          setView('admin');
+        } else {
+          setView('home'); 
+        }
       }
     }
   };
@@ -450,7 +667,7 @@ function App() {
         if (data.tasasDeCambio) setTasaUSD(data.tasasDeCambio.USD);
       })
       .catch(err => console.error("Error en API Moneda:", err));
-  }, []);
+  }, [view]);
 
   useEffect(() => {
     const query = new URLSearchParams(window.location.search);
@@ -473,10 +690,36 @@ function App() {
         const lastCart = JSON.parse(localStorage.getItem('last_cart') || '[]');
         const lastDir = localStorage.getItem('last_dir') || '';
         const total = lastCart.reduce((a, b) => a + (b.precio * b.quantity), 0);
+        
         await fetch('http://localhost:4000/api/pedidos', {
           method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify({ productos: lastCart, total, direccion_envio: lastDir })
         });
+
+        try {
+          const resProds = await fetch('http://localhost:4000/api/productos');
+          const dataProds = await resProds.json();
+          const allProds = dataProds.resultados || [];
+
+          for (const item of lastCart) {
+            const prodDB = allProds.find(p => p._id === item._id);
+            if (prodDB) {
+              const stockKey = item.selectedSize === '50ml' ? 'stock_50' : 'stock_100';
+              const nuevoStock = Math.max(0, prodDB[stockKey] - item.quantity);
+              const { _id, ...datosActualizar } = prodDB;
+              datosActualizar[stockKey] = nuevoStock;
+
+              await fetch(`http://localhost:4000/api/productos/${item._id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datosActualizar)
+              });
+            }
+          }
+        } catch (err) {
+          console.error("Error actualizando stock:", err);
+        }
+
         setShowSuccessModal(true); setCart([]);
       };
       finalizar();
@@ -499,7 +742,7 @@ function App() {
 
   return (
     <div className="app">
-      <Header setView={setView} user={user} logout={() => {localStorage.clear(); setUser(null); setView('home');}} cartCount={cart.length} toggleCart={() => setIsCartOpen(true)} />
+      <Header setView={setView} user={user} logout={() => {localStorage.clear(); setUser(null); setView('home');}} cartCount={cart.length} toggleCart={() => setIsCartOpen(true)} tasaUSD={tasaUSD} />
       <CartDrawer isOpen={isCartOpen} closeCart={() => setIsCartOpen(false)} cart={cart} removeFromCart={(i) => setCart(cart.filter((_, idx) => idx !== i))} handleCheckout={handleCheckout} updateCartQuantity={(i, c) => { const nc = [...cart]; nc[i].quantity += c; if (nc[i].quantity >= 1) setCart(nc); }} updateCartSize={(i, s) => { const nc = [...cart]; nc[i].selectedSize = s; nc[i].precio = s === '50ml' ? Number(nc[i].precio_50) : Number(nc[i].precio_100); nc[i].nombre = nc[i].nombre.replace(/\((50|100)ml\)/, `(${s})`); setCart(nc); }} />
       
       {view === 'home' && (
@@ -527,6 +770,7 @@ function App() {
 
       {view === 'login' && <Login setUser={setUser} setView={setView} />}
       {view === 'orders' && <OrdersView setView={setView} setCart={setCart} setIsCartOpen={setIsCartOpen} />}
+      {view === 'admin' && user === 'admin1' && <AdminView />}
       
       {showSuccessModal && (
         <div className="modal-overlay" onClick={() => setShowSuccessModal(false)}>

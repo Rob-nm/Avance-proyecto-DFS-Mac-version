@@ -100,13 +100,44 @@ app.get('/api/auth/facebook', passport.authenticate('facebook', { scope: ['email
 app.get('/api/auth/facebook/callback', passport.authenticate('facebook', { failureRedirect: '/' }), authExito);
 
 
-
-
 // --- RUTAS DE BASE DE DATOS ---
+
+// Obtener todos los productos
 app.get('/api/productos', async (req, res) => {
     try {
         const productos = await Producto.find();
         res.json({ resultados: productos });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Crear nuevo producto (ADMIN)
+app.post('/api/productos', async (req, res) => {
+    try {
+        const nuevoProducto = new Producto(req.body);
+        await nuevoProducto.save();
+        res.json({ mensaje: 'Producto creado', producto: nuevoProducto });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Actualizar producto (ADMIN y Actualización de Stock)
+app.put('/api/productos/:id', async (req, res) => {
+    try {
+        const productoActualizado = await Producto.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        res.json({ mensaje: 'Producto actualizado', producto: productoActualizado });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Eliminar producto (ADMIN)
+app.delete('/api/productos/:id', async (req, res) => {
+    try {
+        await Producto.findByIdAndDelete(req.params.id);
+        res.json({ mensaje: 'Producto eliminado' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

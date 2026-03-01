@@ -4,11 +4,10 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js",
-    "debug": "node --inspect-brk server.js",
-    "test": "jest"
-  },
+  "start": "node server.js",
+  "dev": "node --watch server.js",
+  "test": "jest --detectOpenHandles --forceExit"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -31,7 +30,7 @@
     "stripe": "^20.4.0"
   },
   "devDependencies": {
-    "jest": "^29.0.0",
-    "supertest": "^6.3.3"
+    "jest": "^29.7.0",
+    "supertest": "^6.3.4"
   }
 }

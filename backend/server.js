@@ -26,6 +26,8 @@ const UsuarioSchema = new mongoose.Schema({
     nombre: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    
+    rol: { type: String, default: 'usuario' }, 
     fecha_registro: { type: Date, default: Date.now }
 });
 const Usuario = mongoose.model('Usuario', UsuarioSchema);
@@ -221,8 +223,21 @@ app.post('/api/auth/login', async (req, res) => {
         const isMatch = await bcrypt.compare(password, usuario.password);
         if (!isMatch) return res.status(400).json({ error: 'Contraseña incorrecta' });
 
-        const token = jwt.sign({ id: usuario._id }, 'clave_secreta_tomford', { expiresIn: '30d' });
-        res.json({ token, usuario: usuario.nombre });
+        // 1. Usamos la variable de entorno para el secreto (más seguro)
+        // 2. Metemos el rol dentro del token para que el middleware lo vea después
+        const token = jwt.sign(
+            { id: usuario._id, rol: usuario.rol }, 
+            process.env.JWT_SECRET || 'clave_temporal', 
+            { expiresIn: '30d' }
+        );
+
+        // 3. ¡ESTA ES LA LÍNEA CLAVE! Debes enviar el rol en el JSON
+        res.json({ 
+            token, 
+            usuario: usuario.nombre, 
+            rol: usuario.rol // <-- Sin esto, Jest siempre recibirá 'undefined'
+        });
+
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -282,6 +297,12 @@ app.post('/api/crear-pago', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-
+module.exports = app
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`));
+
+// CAMBIO AQUÍ: Solo se prende si NO estamos en modo de prueba (test)
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(PORT, () => {
+        console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
+    });
+}

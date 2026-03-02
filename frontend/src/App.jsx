@@ -101,12 +101,13 @@ const CartDrawer = ({ isOpen, closeCart, cart, removeFromCart, handleCheckout, u
   const [calleColonia, setCalleColonia] = useState('');
   const [numero, setNumero] = useState('');
   const [direccionApi, setDireccionApi] = useState(null);
+  const [errorEnvio, setErrorEnvio] = useState(false);
 
   const buscarCP = async (codigo) => {
     setCp(codigo);
     if (codigo.length === 5) {
       try {
-        const res = await fetch(`/api/envio/${codigo}`); // CAMBIO: Ruta relativa
+        const res = await fetch(`/api/envio/${codigo}`);
         const data = await res.json();
         if (res.ok) setDireccionApi(`${data.ciudad}, ${data.estado}`);
         else setDireccionApi(null);
@@ -115,7 +116,12 @@ const CartDrawer = ({ isOpen, closeCart, cart, removeFromCart, handleCheckout, u
   };
 
   const procesarPedido = () => {
-    if (!calleColonia || !numero || !cp) return;
+    if (!calleColonia || !numero || !cp) {
+      setErrorEnvio(true);
+      alert("Por favor, llena todos los campos de envío marcados en rojo.");
+      return;
+    }
+    setErrorEnvio(false);
     const direccionFinal = `${calleColonia}, #${numero}. CP: ${cp}. ${direccionApi || ''}`;
     handleCheckout(direccionFinal);
   };
@@ -165,11 +171,32 @@ const CartDrawer = ({ isOpen, closeCart, cart, removeFromCart, handleCheckout, u
         <div className="cart-footer">
           {cart.length > 0 && (
             <div className="shipping-form-luxury" style={{ marginBottom: '20px', borderBottom: '1px solid #333', paddingBottom: '15px' }}>
-              <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: '10px' }}>DATOS DE ENVÍO</p>
-              <input type="text" placeholder="CALLE Y COLONIA" value={calleColonia} onChange={e => setCalleColonia(e.target.value)} style={{ width: '100%', padding: '10px', background: 'transparent', color: '#fff', border: '1px solid #333', marginBottom: '10px' }} />
+              <p style={{ fontSize: '0.8rem', color: errorEnvio ? '#cf4d4d' : '#888', marginBottom: '10px', transition: 'color 0.3s' }}>
+                {errorEnvio ? '⚠️ DATOS DE ENVÍO INCOMPLETOS' : 'DATOS DE ENVÍO'}
+              </p>
+              <input 
+                type="text" 
+                placeholder="CALLE Y COLONIA" 
+                value={calleColonia} 
+                onChange={e => { setCalleColonia(e.target.value); setErrorEnvio(false); }} 
+                style={{ width: '100%', padding: '10px', background: 'transparent', color: '#fff', border: errorEnvio && !calleColonia ? '1px solid #cf4d4d' : '1px solid #333', marginBottom: '10px', transition: 'border 0.3s' }} 
+              />
               <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-                <input type="text" placeholder="NÚMERO" value={numero} onChange={e => setNumero(e.target.value)} style={{ width: '50%', padding: '10px', background: 'transparent', color: '#fff', border: '1px solid #333' }} />
-                <input type="text" placeholder="C.P." value={cp} onChange={e => buscarCP(e.target.value)} maxLength="5" style={{ width: '50%', padding: '10px', background: 'transparent', color: '#fff', border: '1px solid #333' }} />
+                <input 
+                  type="text" 
+                  placeholder="NÚMERO" 
+                  value={numero} 
+                  onChange={e => { setNumero(e.target.value); setErrorEnvio(false); }} 
+                  style={{ width: '50%', padding: '10px', background: 'transparent', color: '#fff', border: errorEnvio && !numero ? '1px solid #cf4d4d' : '1px solid #333', transition: 'border 0.3s' }} 
+                />
+                <input 
+                  type="text" 
+                  placeholder="C.P." 
+                  value={cp} 
+                  onChange={e => { buscarCP(e.target.value); setErrorEnvio(false); }} 
+                  maxLength="5" 
+                  style={{ width: '50%', padding: '10px', background: 'transparent', color: '#fff', border: errorEnvio && !cp ? '1px solid #cf4d4d' : '1px solid #333', transition: 'border 0.3s' }} 
+                />
               </div>
               {direccionApi && <p style={{ fontSize: '0.75rem', color: '#d4af37' }}>📍 {direccionApi}</p>}
             </div>

@@ -102,6 +102,9 @@ const CartDrawer = ({ isOpen, closeCart, cart, removeFromCart, handleCheckout, u
   const [numero, setNumero] = useState('');
   const [direccionApi, setDireccionApi] = useState(null);
   const [errorEnvio, setErrorEnvio] = useState(false);
+  const [shakeColonia, setShakeColonia] = useState(false);
+  const [shakeNumero, setShakeNumero] = useState(false);
+  const [shakeCp, setShakeCp] = useState(false);
 
   const buscarCP = async (codigo) => {
     setCp(codigo);
@@ -116,9 +119,14 @@ const CartDrawer = ({ isOpen, closeCart, cart, removeFromCart, handleCheckout, u
   };
 
   const procesarPedido = () => {
-    if (!calleColonia || !numero || !cp) {
+    let hasError = false;
+    
+    if (!calleColonia) { setShakeColonia(true); setTimeout(() => setShakeColonia(false), 400); hasError = true; }
+    if (!numero) { setShakeNumero(true); setTimeout(() => setShakeNumero(false), 400); hasError = true; }
+    if (!cp) { setShakeCp(true); setTimeout(() => setShakeCp(false), 400); hasError = true; }
+
+    if (hasError) {
       setErrorEnvio(true);
-      alert("Por favor, llena todos los campos de envío marcados en rojo.");
       return;
     }
     setErrorEnvio(false);
@@ -172,30 +180,33 @@ const CartDrawer = ({ isOpen, closeCart, cart, removeFromCart, handleCheckout, u
           {cart.length > 0 && (
             <div className="shipping-form-luxury" style={{ marginBottom: '20px', borderBottom: '1px solid #333', paddingBottom: '15px' }}>
               <p style={{ fontSize: '0.8rem', color: errorEnvio ? '#cf4d4d' : '#888', marginBottom: '10px', transition: 'color 0.3s' }}>
-                {errorEnvio ? '⚠️ DATOS DE ENVÍO INCOMPLETOS' : 'DATOS DE ENVÍO'}
+                {errorEnvio ? '⚠️ FALTAN DATOS DE ENVÍO' : 'DATOS DE ENVÍO'}
               </p>
               <input 
                 type="text" 
                 placeholder="CALLE Y COLONIA" 
                 value={calleColonia} 
+                className={shakeColonia ? 'shake' : ''}
                 onChange={e => { setCalleColonia(e.target.value); setErrorEnvio(false); }} 
-                style={{ width: '100%', padding: '10px', background: 'transparent', color: '#fff', border: errorEnvio && !calleColonia ? '1px solid #cf4d4d' : '1px solid #333', marginBottom: '10px', transition: 'border 0.3s' }} 
+                style={{ width: '100%', padding: '10px', background: 'transparent', color: '#fff', border: (errorEnvio && !calleColonia) || shakeColonia ? '1px solid #cf4d4d' : '1px solid #333', marginBottom: '10px', transition: 'border 0.3s', outline: 'none' }} 
               />
               <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
                 <input 
                   type="text" 
                   placeholder="NÚMERO" 
                   value={numero} 
+                  className={shakeNumero ? 'shake' : ''}
                   onChange={e => { setNumero(e.target.value); setErrorEnvio(false); }} 
-                  style={{ width: '50%', padding: '10px', background: 'transparent', color: '#fff', border: errorEnvio && !numero ? '1px solid #cf4d4d' : '1px solid #333', transition: 'border 0.3s' }} 
+                  style={{ width: '50%', padding: '10px', background: 'transparent', color: '#fff', border: (errorEnvio && !numero) || shakeNumero ? '1px solid #cf4d4d' : '1px solid #333', transition: 'border 0.3s', outline: 'none' }} 
                 />
                 <input 
                   type="text" 
                   placeholder="C.P." 
                   value={cp} 
+                  className={shakeCp ? 'shake' : ''}
                   onChange={e => { buscarCP(e.target.value); setErrorEnvio(false); }} 
                   maxLength="5" 
-                  style={{ width: '50%', padding: '10px', background: 'transparent', color: '#fff', border: errorEnvio && !cp ? '1px solid #cf4d4d' : '1px solid #333', transition: 'border 0.3s' }} 
+                  style={{ width: '50%', padding: '10px', background: 'transparent', color: '#fff', border: (errorEnvio && !cp) || shakeCp ? '1px solid #cf4d4d' : '1px solid #333', transition: 'border 0.3s', outline: 'none' }} 
                 />
               </div>
               {direccionApi && <p style={{ fontSize: '0.75rem', color: '#d4af37' }}>📍 {direccionApi}</p>}

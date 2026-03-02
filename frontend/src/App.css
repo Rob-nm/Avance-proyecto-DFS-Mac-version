@@ -1166,3 +1166,12 @@ footer { padding: 40px; text-align: center; font-size: 0.7rem; color: #666; lett
     display: none;
   }
 }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+.shake {
+  animation: shake 0.4s ease-in-out;
+}

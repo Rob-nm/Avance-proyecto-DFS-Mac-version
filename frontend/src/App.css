@@ -1127,3 +1127,7 @@ footer { padding: 40px; text-align: center; font-size: 0.7rem; color: #666; lett
   background-color: #000;
   width: 100%;
 }
+
+.desktop-nav.open{
+  display: flex;
+}

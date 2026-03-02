@@ -15,19 +15,33 @@ const Header = ({ setView, user, logout, cartCount, toggleCart, tasaUSD }) => {
 
   return (
     <header className="header">
-      <button className="mobile-menu-btn" onClick={() => setIsMenuOpen(true)}>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      <button className="mobile-menu-btn" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          {isMenuOpen ? (
+            <>
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </>
+          ) : (
+            <>
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </>
+          )}
+        </svg>
       </button>
 
       <div className="logo" onClick={() => handleNavClick('home')}>TOMFORD</div>
 
-      <nav className="desktop-nav">
-        <button onClick={() => setView('home')}>Fragancias</button>
-        <button onClick={() => setView('catalogo')} className="nav-btn">CATÁLOGO</button>
-        <button onClick={() => setView('home')}>Regalos</button>
-        <button onClick={() => setView('home')}>Servicios</button>
+      {/* Aquí se agregó la condición para la clase 'open' */}
+      <nav className={`desktop-nav ${isMenuOpen ? 'open' : ''}`}>
+        <button onClick={() => handleNavClick('home')}>Fragancias</button>
+        <button onClick={() => handleNavClick('catalogo')} className="nav-btn">CATÁLOGO</button>
+        <button onClick={() => handleNavClick('home')}>Regalos</button>
+        <button onClick={() => handleNavClick('home')}>Servicios</button>
         {user === 'admin1' && (
-          <button onClick={() => setView('admin')} className="nav-btn" style={{ color: '#d4af37' }}>ADMIN</button>
+          <button onClick={() => handleNavClick('admin')} className="nav-btn" style={{ color: '#d4af37' }}>ADMIN</button>
         )}
         {tasaUSD && (
           <span style={{ marginLeft: '20px', color: '#888', fontSize: '0.7rem', letterSpacing: '1px', display: 'flex', alignItems: 'center' }}>
@@ -49,15 +63,15 @@ const Header = ({ setView, user, logout, cartCount, toggleCart, tasaUSD }) => {
                     <button onClick={() => handleNavClick('admin')} style={{ color: '#d4af37' }}>PANEL ADMIN</button>
                   )}
                   <button onClick={() => handleNavClick('orders')}>MIS PEDIDOS</button>
-                  <button onClick={() => { logout(); setIsUserMenuOpen(false); }}>SALIR</button>
+                  <button onClick={() => { logout(); setIsUserMenuOpen(false); setIsMenuOpen(false); }}>SALIR</button>
                 </div>
               )}
             </div>
           ) : (
-            <button onClick={() => setView('login')}>CUENTA</button>
+            <button onClick={() => handleNavClick('login')}>CUENTA</button>
           )}
         </div>
-        <button onClick={toggleCart} className="cart-icon-btn">
+        <button onClick={() => { toggleCart(); setIsMenuOpen(false); }} className="cart-icon-btn">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
             <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -69,7 +83,6 @@ const Header = ({ setView, user, logout, cartCount, toggleCart, tasaUSD }) => {
     </header>
   );
 };
-
 const CartDrawer = ({ isOpen, closeCart, cart, removeFromCart, handleCheckout, updateCartSize, updateCartQuantity }) => {
   const total = cart.reduce((acc, item) => acc + (Number(item.precio) * item.quantity), 0);
   const [cp, setCp] = useState('');

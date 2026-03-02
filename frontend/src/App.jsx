@@ -43,8 +43,20 @@ const Header = ({ setView, user, logout, cartCount, toggleCart, tasaUSD }) => {
         {user === 'admin1' && (
           <button onClick={() => handleNavClick('admin')} className="nav-btn" style={{ color: '#d4af37' }}>ADMIN</button>
         )}
+
+        <div className="mobile-auth">
+          {user ? (
+            <>
+              <button onClick={() => handleNavClick('orders')} style={{ color: '#d4af37' }}>MIS PEDIDOS</button>
+              <button onClick={() => { logout(); setIsMenuOpen(false); }}>SALIR</button>
+            </>
+          ) : (
+            <button onClick={() => handleNavClick('login')} style={{ color: '#d4af37' }}>INICIAR SESIÓN</button>
+          )}
+        </div>
+
         {tasaUSD && (
-          <span style={{ marginLeft: '20px', color: '#888', fontSize: '0.7rem', letterSpacing: '1px', display: 'flex', alignItems: 'center' }}>
+          <span style={{ color: '#888', fontSize: '0.7rem', letterSpacing: '1px', marginTop: '10px' }}>
             1 USD = ${(1 / tasaUSD).toFixed(2)} MXN
           </span>
         )}

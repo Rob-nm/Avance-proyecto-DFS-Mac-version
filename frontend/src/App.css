@@ -1128,6 +1128,41 @@ footer { padding: 40px; text-align: center; font-size: 0.7rem; color: #666; lett
   width: 100%;
 }
 
-.desktop-nav.open{
-  display: flex;
+.mobile-auth {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .desktop-nav.open {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 60px; 
+    left: 0;
+    width: 100%;
+    background-color: #050505;
+    padding: 20px 0;
+    z-index: 1000;
+    align-items: center;
+    border-bottom: 1px solid #333;
+  }
+
+  .desktop-nav.open button {
+    margin: 12px 0;
+    width: 100%;
+  }
+
+  .mobile-auth {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+    border-top: 1px solid #222;
+    padding-top: 15px;
+    margin-top: 10px;
+  }
+
+  .desktop-auth {
+    display: none;
+  }
 }

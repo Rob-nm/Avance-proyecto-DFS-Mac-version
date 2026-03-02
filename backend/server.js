@@ -305,10 +305,9 @@ app.post('/api/crear-pago', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-
+module.exports = app;
 const PORT = process.env.PORT || 4000;
 if (process.env.NODE_ENV !== 'test') {
     app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`));
 }
 
-module.exports = app;

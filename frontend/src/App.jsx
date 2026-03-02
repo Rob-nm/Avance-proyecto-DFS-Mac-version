@@ -81,7 +81,7 @@ const CartDrawer = ({ isOpen, closeCart, cart, removeFromCart, handleCheckout, u
     setCp(codigo);
     if (codigo.length === 5) {
       try {
-        const res = await fetch(`http://localhost:4000/api/envio/${codigo}`);
+        const res = await fetch(`/api/envio/${codigo}`); // CAMBIO: Ruta relativa
         const data = await res.json();
         if (res.ok) setDireccionApi(`${data.ciudad}, ${data.estado}`);
         else setDireccionApi(null);
@@ -178,7 +178,7 @@ const AdminView = () => {
 
   const confirmarEliminacion = async () => {
     if (!productToDelete) return;
-    await fetch(`http://localhost:4000/api/productos/${productToDelete}`, { method: 'DELETE' });
+    await fetch(`/api/productos/${productToDelete}`, { method: 'DELETE' }); // CAMBIO: Ruta relativa
     setProductToDelete(null);
     fetchProductos();
   };
@@ -186,7 +186,7 @@ const AdminView = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const method = editingId ? 'PUT' : 'POST';
-    const url = editingId ? `http://localhost:4000/api/productos/${editingId}` : 'http://localhost:4000/api/productos';
+    const url = editingId ? `/api/productos/${editingId}` : '/api/productos'; // CAMBIO: Ruta relativa
     
     const datosParaEnviar = {
       nombre: form.nombre,
@@ -363,7 +363,7 @@ const OrdersView = ({ setView, setCart, setIsCartOpen }) => {
   const [expandedOrders, setExpandedOrders] = useState({});
 
   const fetchPedidos = async () => {
-    const res = await fetch('http://localhost:4000/api/pedidos', {
+    const res = await fetch('/api/pedidos', { // CAMBIO: Ruta relativa
       headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
     });
     const data = await res.json();
@@ -374,7 +374,7 @@ const OrdersView = ({ setView, setCart, setIsCartOpen }) => {
 
   const confirmarEliminacion = async () => {
     if (!orderToDelete) return;
-    await fetch(`http://localhost:4000/api/pedidos/${orderToDelete}`, {
+    await fetch(`/api/pedidos/${orderToDelete}`, { // CAMBIO: Ruta relativa
       method: 'DELETE', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
     });
     setOrderToDelete(null);
@@ -388,7 +388,7 @@ const OrdersView = ({ setView, setCart, setIsCartOpen }) => {
   const actualizarDireccion = async (id) => {
     const pedido = pedidos.find(p => p._id === id);
     const nuevaDir = direcciones[id] || pedido.direccion_envio;
-    await fetch(`http://localhost:4000/api/pedidos/${id}`, {
+    await fetch(`/api/pedidos/${id}`, { // CAMBIO: Ruta relativa
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
       body: JSON.stringify({ direccion_envio: nuevaDir })
@@ -594,7 +594,7 @@ const Login = ({ setUser, setView }) => {
   const handle = async (e) => {
     e.preventDefault();
     const endpoint = isRegistering ? '/registro' : '/login';
-    const res = await fetch(`http://localhost:4000/api/auth${endpoint}`, {
+    const res = await fetch(`/api/auth${endpoint}`, { // CAMBIO: Ruta relativa
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form)
     });
     const data = await res.json();
@@ -614,7 +614,7 @@ const Login = ({ setUser, setView }) => {
   };
 
   const handleOAuth = (provider) => {
-    window.location.href = `http://localhost:4000/api/auth/${provider}`;
+    window.location.href = `/api/auth/${provider}`; // CAMBIO: Ruta relativa
   };
 
   return (
@@ -661,7 +661,7 @@ function App() {
       .then(res => res.json())
       .then(data => setProductos(data.resultados || []));
 
-    fetch('http://localhost:4000/api/conversion/MXN')
+    fetch('/api/conversion/MXN') // CAMBIO: Ruta relativa
       .then(res => res.json())
       .then(data => {
         if (data.tasasDeCambio) setTasaUSD(data.tasasDeCambio.USD);
@@ -691,13 +691,13 @@ function App() {
         const lastDir = localStorage.getItem('last_dir') || '';
         const total = lastCart.reduce((a, b) => a + (b.precio * b.quantity), 0);
         
-        await fetch('http://localhost:4000/api/pedidos', {
+        await fetch('/api/pedidos', { // CAMBIO: Ruta relativa
           method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify({ productos: lastCart, total, direccion_envio: lastDir })
         });
 
         try {
-          const resProds = awaitfetch('/api/productos');
+          const resProds = await fetch('/api/productos'); // CAMBIO: Corregido typo (awaitfetch)
           const dataProds = await resProds.json();
           const allProds = dataProds.resultados || [];
 
@@ -709,7 +709,7 @@ function App() {
               const { _id, ...datosActualizar } = prodDB;
               datosActualizar[stockKey] = nuevoStock;
 
-              await fetch(`http://localhost:4000/api/productos/${item._id}`, {
+              await fetch(`/api/productos/${item._id}`, { // CAMBIO: Ruta relativa
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(datosActualizar)
@@ -732,7 +732,7 @@ function App() {
     if (!token) return setView('login');
     localStorage.setItem('last_cart', JSON.stringify(cart));
     localStorage.setItem('last_dir', direccion);
-    const res = await fetch('http://localhost:4000/api/crear-pago', {
+    const res = await fetch('/api/crear-pago', { // CAMBIO: Ruta relativa
       method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({ carrito: cart })
     });

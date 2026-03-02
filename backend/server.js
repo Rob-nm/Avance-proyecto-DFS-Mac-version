@@ -34,14 +34,15 @@ connectDB();
 const JWT_SECRET = process.env.JWT_SECRET || 'clave_secreta_tomford';
 
 // --- MODELOS DE MONGOOSE ---
+// Validación Serverless: Revisa si el modelo ya existe antes de crearlo para evitar OverwriteModelError
 const UsuarioSchema = new mongoose.Schema({
     nombre: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    rol: { type: String, default: 'usuario' }, // Soporte para administrador
+    rol: { type: String, default: 'usuario' }, 
     fecha_registro: { type: Date, default: Date.now }
 });
-const Usuario = mongoose.model('Usuario', UsuarioSchema);
+const Usuario = mongoose.models.Usuario || mongoose.model('Usuario', UsuarioSchema);
 
 const ProductoSchema = new mongoose.Schema({
     nombre: String,
@@ -52,7 +53,7 @@ const ProductoSchema = new mongoose.Schema({
     stock_100: { type: Number, default: 15 },
     imagen_url: String
 });
-const Producto = mongoose.model('Producto', ProductoSchema);
+const Producto = mongoose.models.Producto || mongoose.model('Producto', ProductoSchema);
 
 const PedidoSchema = new mongoose.Schema({
     usuario_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario' },
@@ -61,7 +62,7 @@ const PedidoSchema = new mongoose.Schema({
     direccion_envio: String,
     fecha: { type: Date, default: Date.now }
 });
-const Pedido = mongoose.model('Pedido', PedidoSchema);
+const Pedido = mongoose.models.Pedido || mongoose.model('Pedido', PedidoSchema);
 
 app.use(session({ secret: process.env.SESSION_SECRET || 'secreto', resave: false, saveUninitialized: true }));
 app.use(passport.initialize());
@@ -126,7 +127,6 @@ app.get('/api/auth/facebook/callback', passport.authenticate('facebook', { failu
 
 
 // --- RUTAS DE BASE DE DATOS ---
-
 app.get('/api/productos', async (req, res) => {
     try {
         const productos = await Producto.find();
@@ -300,8 +300,8 @@ app.post('/api/crear-pago', async (req, res) => {
             payment_method_types: ['card'],
             line_items: lineItems,
             mode: 'payment',
-            success_url: `${FRONTEND_URL}/?pago=exito`, // Ruta dinámica de Stripe
-            cancel_url: `${FRONTEND_URL}/`,             // Ruta dinámica de Stripe
+            success_url: `${FRONTEND_URL}/?pago=exito`, 
+            cancel_url: `${FRONTEND_URL}/`,             
         });
 
         res.json({ url: session.url });

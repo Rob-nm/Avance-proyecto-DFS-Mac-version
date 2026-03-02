@@ -1132,7 +1132,7 @@ footer { padding: 40px; text-align: center; font-size: 0.7rem; color: #666; lett
   display: none;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .desktop-nav.open {
     display: flex;
     flex-direction: column;

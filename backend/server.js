@@ -305,6 +305,16 @@ app.post('/api/crear-pago', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+const path = require('path');
+
+// 1. Servir los archivos estáticos de tu carpeta frontend
+// (Asegúrate de que el nombre sea 'dist' o 'build' según tu proyecto)
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
+// 2. Ruta para que cualquier petición que no sea de la API cargue tu página
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/dist', 'index.html'));
+});
 module.exports = app;
 const PORT = process.env.PORT || 4000;
 if (process.env.NODE_ENV !== 'test') {

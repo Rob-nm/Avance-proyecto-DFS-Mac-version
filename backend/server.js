@@ -19,6 +19,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+
+const opcionesCors = {
+    origin: process.env.FRONTEND_URL || "http://localhost:5173", // Usa la URL de Vercel que pusiste en las variables
+    methods: "GET,POST,PUT,DELETE",
+    credentials: true
+};
+
+app.use(cors(opcionesCors));
 // Conectar a BD
 connectDB();
 

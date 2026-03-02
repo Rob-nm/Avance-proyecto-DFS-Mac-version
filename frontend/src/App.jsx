@@ -169,7 +169,7 @@ const AdminView = () => {
   });
 
   const fetchProductos = () => {
-    fetch('http://localhost:4000/api/productos')
+    fetch('/api/productos')
       .then(res => res.json())
       .then(data => setProductos(data.resultados || []));
   };
@@ -657,7 +657,7 @@ function App() {
   const [tasaUSD, setTasaUSD] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:4000/api/productos')
+    fetch('/api/productos')
       .then(res => res.json())
       .then(data => setProductos(data.resultados || []));
 
@@ -697,7 +697,7 @@ function App() {
         });
 
         try {
-          const resProds = await fetch('http://localhost:4000/api/productos');
+          const resProds = awaitfetch('/api/productos');
           const dataProds = await resProds.json();
           const allProds = dataProds.resultados || [];
 

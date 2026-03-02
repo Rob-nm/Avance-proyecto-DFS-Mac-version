@@ -10,7 +10,8 @@ const session = require('express-session');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const GitHubStrategy = require('passport-github2').Strategy;
 const FacebookStrategy = require('passport-facebook').Strategy;
-
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:4000";
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 // Configuración de Stripe
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
@@ -77,17 +78,30 @@ const procesarOAuth = async (accessToken, refreshToken, profile, done) => {
     }
 };
 
-passport.use(new GoogleStrategy({ clientID: process.env.GOOGLE_CLIENT_ID, clientSecret: process.env.GOOGLE_CLIENT_SECRET, callbackURL: "/api/auth/google/callback" }, procesarOAuth));
-passport.use(new GitHubStrategy({ clientID: process.env.GITHUB_CLIENT_ID, clientSecret: process.env.GITHUB_CLIENT_SECRET, callbackURL: "/api/auth/github/callback" }, procesarOAuth));
+// --- ESTRATEGIAS DE PASSPORT ---
+passport.use(new GoogleStrategy({ 
+    clientID: process.env.GOOGLE_CLIENT_ID, 
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET, 
+    callbackURL: `${BACKEND_URL}/api/auth/google/callback` 
+}, procesarOAuth));
+
+passport.use(new GitHubStrategy({ 
+    clientID: process.env.GITHUB_CLIENT_ID, 
+    clientSecret: process.env.GITHUB_CLIENT_SECRET, 
+    callbackURL: `${BACKEND_URL}/api/auth/github/callback` 
+}, procesarOAuth));
+
 passport.use(new FacebookStrategy({ 
     clientID: process.env.FACEBOOK_APP_ID, 
     clientSecret: process.env.FACEBOOK_APP_SECRET, 
-    callbackURL: "http://localhost:4000/api/auth/facebook/callback", 
+    callbackURL: `${BACKEND_URL}/api/auth/facebook/callback`, 
     profileFields: ['id', 'displayName', 'name', 'emails'] 
 }, procesarOAuth));
 
+// --- REDIRECCIÓN AL FRONTEND ---
 const authExito = (req, res) => {
-    res.redirect(`http://localhost:5173/?token=${req.user.token}&user=${req.user.nombre}`);
+    // Ahora redirige dinámicamente según el entorno
+    res.redirect(`${FRONTEND_URL}/?token=${req.user.token}&user=${req.user.nombre}`);
 };
 
 app.get('/api/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));

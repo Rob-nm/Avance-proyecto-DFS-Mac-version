@@ -1,10 +1,12 @@
 {
-    "version": 2,
-    "builds": [
-      { "src": "backend/server.js", "use": "@vercel/node" }
-    ],
-    "routes": [
-      { "src": "/api/(.*)", "dest": "backend/server.js" }
-    ]
-  }
-  
+  "version": 2,
+  "functions": {
+    "backend/server.js": {
+      "runtime": "@vercel/node"
+    }
+  },
+  "routes": [
+    { "src": "/api/(.*)", "dest": "backend/server.js" },
+    { "src": "/(.*)", "dest": "backend/server.js" }
+  ]
+}
